@@ -1,0 +1,31 @@
+# LAMMPS input script simulates LJ Coulomb repulsion particles in the quasi 2D box
+
+units real
+dimension 3
+atom_style full
+pair_style lj/cut/coul/long 17.0 
+boundary p p p
+kspace_style ewald 1.0e-4
+region myreg block -200 200 -200 200 -0.5 0.5
+create_box 1 myreg
+create_atoms 1 random 400 341344 myreg
+
+mass 1 1
+pair_coeff 1 1 1.0 1.0
+set type 1 charge 1.0
+
+#neigh_modify every 1 delay 5 check yes
+velocity all create 300.0 4928459 rot yes dist gaussian
+
+minimize 1.0e-4 1.0e-6 3 10
+reset_timestep 0
+
+fix mynve all nve
+fix mylgv all langevin 300.0 300.0 0.1 1530917
+timestep 0.05
+
+thermo 1000
+#dump  mydmp all atom 10000 dump.lammpstrj
+dump 3 all custom 200000 xy.xyz x y q
+
+run 200000
